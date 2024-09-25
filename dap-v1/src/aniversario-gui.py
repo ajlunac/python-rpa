@@ -8,10 +8,11 @@ from tkinter import messagebox
 frm = Tk()
 frm.title("RPA Python")
 
-frm.geometry("840x350")
+# frm.geometry("840x350")
 
 estilo = ttk.Style()
 estilo.theme_use("clam")
+estilo.configure(".", font=("Arial 12"), rowheight=25)
 
 treeviewDatos = ttk.Treeview(frm, columns=(1,2,3), show="headings")
 treeviewDatos.column("1", anchor=CENTER)
@@ -94,6 +95,11 @@ btnAdicionar = Button(text="Adicionar", font="Arial 12", command=addItemsTreevie
 btnAdicionar.grid(row=1, column=2, columnspan=2, sticky=NSEW)
 
 def actualizarItemsTreeview():
+    
+    if len(treeviewDatos.selection()) == 0:
+        messagebox.showinfo("Información", "Debe seleccionar un item para actualizar")
+        return
+    
     if txtNombre.get() == "":
         messagebox.showinfo("Información", "El campo Nombre es obligatorio")
     elif txtFechaNacimiento.get() == "":
@@ -101,8 +107,8 @@ def actualizarItemsTreeview():
     elif txtEmail.get() == "":
         messagebox.showinfo("Información", "El campo Email es obligatorio")
     else:
-        itemsSeleccionados = treeviewDatos.selection()[0]
-        treeviewDatos.item(itemsSeleccionados, values=(str(txtNombre.get()),
+        itemsSeleccionado = treeviewDatos.selection()[0]
+        treeviewDatos.item(itemsSeleccionado, values=(str(txtNombre.get()),
                                                         str(txtFechaNacimiento.get()),
                                                         str(txtEmail.get())))
         messagebox.showinfo("Información", "El item se actualizó correctamente")
@@ -114,6 +120,15 @@ def actualizarItemsTreeview():
 
 btnActualizar = Button(text="Actulizar", font="Arial 12", command=actualizarItemsTreeview)
 btnActualizar.grid(row=1, column=4, columnspan=2, sticky=NSEW)
+
+
+def crearEmail():
+    for numeroLinea in treeviewDatos.get_children():
+        datosDeLinea = treeviewDatos.item(numeroLinea)["values"]
+        print(datosDeLinea)
+
+btnCrearEmail = Button(text="Crear email", font="Arial 12", command=crearEmail)
+btnCrearEmail.grid(row=1, column=6, columnspan=2, sticky=NSEW)
 
 
 frm.mainloop()
