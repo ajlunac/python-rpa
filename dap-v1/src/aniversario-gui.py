@@ -4,6 +4,7 @@ import pandas as pd
 from datetime import date
 import numpy as np
 from tkinter import messagebox
+import win32com.client as win32
 
 frm = Tk()
 frm.title("RPA Python")
@@ -50,7 +51,10 @@ def eliminarItemTreeview():
     itemsSeleccionados = treeviewDatos.selection()
     for itemSeleccionado in itemsSeleccionados:
         treeviewDatos.delete(itemSeleccionado)
+        
         messagebox.showinfo("Información", "El item se eliminó correctamente")
+        
+        numeroLineas()
     
 btnEliminar = Button(text="Eliminar", font="Arial 12", command=eliminarItemTreeview)
 btnEliminar.grid(row=1, column=0, columnspan=2, sticky=NSEW)
@@ -86,7 +90,11 @@ def addItemsTreeview():
         treeviewDatos.insert("", END, values=(str(txtNombre.get()), 
                                             str(txtFechaNacimiento.get()), 
                                             str(txtEmail.get())))
+    
         messagebox.showinfo("Información", "El item se agregó correctamente")
+        
+        numeroLineas()
+        
         txtNombre.delete(0, END)
         txtFechaNacimiento.delete(0, END)
         txtEmail.delete(0, END)
@@ -124,11 +132,59 @@ btnActualizar.grid(row=1, column=4, columnspan=2, sticky=NSEW)
 
 def crearEmail():
     for numeroLinea in treeviewDatos.get_children():
-        datosDeLinea = treeviewDatos.item(numeroLinea)["values"]
-        print(datosDeLinea)
+        
+        # Email para enviar desde Outlook.
+        outlook = win32.Dispatch('outlook.application')
+        emailOutlook = outlook.CreateItem(0)
+        
+        nombre = treeviewDatos.item(numeroLinea)["values"][0]
+        aniversario = treeviewDatos.item(numeroLinea)["values"][1]
+        email = treeviewDatos.item(numeroLinea)["values"][2]
+        
+        primerNombre = nombre.split(" ")[0]
+        
+        emailOutlook.To = email
+        emailOutlook.Subject = 'Feliz Aniversario!' + str(nombre)
+        emailOutlook.HtmlBody = f"""
+        <p>Felicidades, <b>{primerNombre}!</b></p>
+        <p><font color="blue">Este es un correo de prueba para el envío de un correo electrónico con Python.</font></p>
+        <p><a href="https://www.python.org/">Visita Python</a></p>
+        <p>Saludos,</p>
+        <p><img src=r"img/python-logo.png" alt="Logo Python"></p>
+        """
+        emailOutlook.save()
+        
+    messagebox.showinfo("Información", "Emails creados correctamente!")
 
 btnCrearEmail = Button(text="Crear email", font="Arial 12", command=crearEmail)
 btnCrearEmail.grid(row=1, column=6, columnspan=2, sticky=NSEW)
+
+lblNumeroLineas = Label(text="Número de lineas: ", font="Arial 12")
+lblNumeroLineas.grid(row=4, column=0, columnspan=8, sticky="W")
+
+def numeroLineas(item=""):
+    numero = 0
+    lineas = treeviewDatos.get_children(item)
+    for linea in lineas:
+        numero += 1
+    
+    lblNumeroLineas.config(text="Aniversariantes: " + str(numero))
+    
+numeroLineas()
+
+def pasarDatosTextbox(Event):
+    item = treeviewDatos.selection()
+    for linea in item:
+        txtNombre.delete(0, END)
+        txtFechaNacimiento.delete(0, END)
+        txtEmail.delete(0, END)
+        
+        txtNombre.insert(0, treeviewDatos.item(linea)["values"][0])
+        txtFechaNacimiento.insert(0, treeviewDatos.item(linea)["values"][1])  
+        txtEmail.insert(0, treeviewDatos.item(linea)["values"][2])  
+        
+
+treeviewDatos.bind("<Double-1>", pasarDatosTextbox)
 
 
 frm.mainloop()
