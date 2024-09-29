@@ -36,8 +36,11 @@ treeviewDatos.heading(6, text="Email")
 treeviewDatos.grid(row=4, column=0, columnspan=6, sticky="nsew", pady=15)
 
 def pasarDatosTreeview(event):
+    
     itemSeleccionado = treeviewDatos.selection()
+    
     for columna in itemSeleccionado:
+        
         txtDireccion.delete(0, END)
         txtNombre.delete(0, END)
         txtDocumento.delete(0, END)
@@ -117,12 +120,73 @@ txtEmail = Entry(font=("Arial 12"))
 txtEmail.grid(row=1, column=5, sticky="W", pady=15)
 
 def filtrarDatos():
-    pass
+    
+    for linea in range(len(datosUsuarios)):
+        
+        todasLasLineas = treeviewDatos.get_children()
+        treeviewDatos.delete(*todasLasLineas)
+        
+        if txtDocumento.get() == "":
+            
+            btnFiltrar.config(text="Filtrar")
+
+            for linea in range(len(datosUsuarios)):
+                
+                fechaInicialAnio = datosUsuarios.iloc[linea, 3].split("-")[0]
+                fechaInicialMes = datosUsuarios.iloc[linea, 3].split("-")[1]
+                fechaInicialDia = datosUsuarios.iloc[linea, 3].split("-")[2]
+                
+                fechaInicioTratada = fechaInicialDia + "/" + fechaInicialMes + "/" + fechaInicialAnio
+                
+                fechaFinalAnio = datosUsuarios.iloc[linea, 4].split("-")[0]
+                fechaFinalMes = datosUsuarios.iloc[linea, 4].split("-")[1]
+                fechaFinalDia = datosUsuarios.iloc[linea, 4].split("-")[2]
+                
+                fechaFinalTratada = fechaFinalDia + "/" + fechaFinalMes + "/" + fechaFinalAnio
+                
+                
+                treeviewDatos.insert("", "end", values=(str(datosUsuarios.iloc[linea, 0]),
+                                                        str(datosUsuarios.iloc[linea, 1]),
+                                                        str(datosUsuarios.iloc[linea, 2]),
+                                                        str(fechaInicioTratada),
+                                                        str(fechaFinalTratada),
+                                                        str(datosUsuarios.iloc[linea, 5]),))
+        
+        else:
+            
+            btnFiltrar.config(text="Limpiar Filtros")
+            
+            for linea in range(len(datosUsuarios)):
+                
+                fechaInicialAnio = datosUsuarios.iloc[linea, 3].split("-")[0]
+                fechaInicialMes = datosUsuarios.iloc[linea, 3].split("-")[1]
+                fechaInicialDia = datosUsuarios.iloc[linea, 3].split("-")[2]
+                
+                fechaInicioTratada = fechaInicialDia + "/" + fechaInicialMes + "/" + fechaInicialAnio
+                
+                fechaFinalAnio = datosUsuarios.iloc[linea, 4].split("-")[0]
+                fechaFinalMes = datosUsuarios.iloc[linea, 4].split("-")[1]
+                fechaFinalDia = datosUsuarios.iloc[linea, 4].split("-")[2]
+            
+                fechaFinalTratada = fechaFinalDia + "/" + fechaFinalMes + "/" + fechaFinalAnio
+                
+                if txtDocumento.get() in str(datosUsuarios.iloc[linea, 2]):
+                    
+                    treeviewDatos.insert("", "end", values=(str(datosUsuarios.iloc[linea, 0]),
+                                                    str(datosUsuarios.iloc[linea, 1]),
+                                                    str(datosUsuarios.iloc[linea, 2]),
+                                                    str(fechaInicioTratada),
+                                                    str(fechaFinalTratada),
+                                                    str(datosUsuarios.iloc[linea, 5]),))
+                    
+
+        
 
 btnFiltrar = Button(text="Filtrar", font=("Arial 12"), command=filtrarDatos)
 btnFiltrar.grid(row=5, column=0, columnspan=2, sticky="nsew", padx=20)
 
 def generarCertificado():
+    
     certificadoBase = Document(r"dap-v1\data\certificado-base.docx")
     
     estilo = certificadoBase.styles["Normal"]
@@ -137,13 +201,16 @@ def generarCertificado():
     contenidoCertificado = f"{nombreAlumno}, con número de documento {documentoAlumno},  {contenidoBase} {fechaInicio} y finalizado el {fechaFin}. "
     
     for paragrafo in certificadoBase.paragraphs:
+        
         if "@nombre" in paragrafo.text:
+            
             paragrafo.text = nombreAlumno
             fuente = estilo.font
             fuente.name = "Calibri (Corpo)"
             fuente.size = Pt(14)
             
         if "@fecha_final" in paragrafo.text:
+            
             paragrafo.text = contenidoCertificado
             fuente = estilo.font
             fuente.name = "Calibri (Corpo)"
@@ -165,7 +232,44 @@ btnGenerarCertificado = Button(text="Generar Certificado", font=("Arial 12"), co
 btnGenerarCertificado.grid(row=5, column=2, columnspan=2, sticky="nsew", padx=20)
 
 def generarCertificadoEnMasa():
-    pass
+    
+    for linea in treeviewDatos.get_children():
+        
+        columna = treeviewDatos.item(linea)["values"]
+        
+        nombreAlumnoSeparado = columna[1]
+        documentoSeparado = columna[2]
+        fechaInicialSeparado = columna[3]
+        fechaFinalSeparado = columna[4]
+        nombreInstructorSeparado = "RPA Python"
+        
+        certificadoBase = Document(r"dap-v1\data\certificado-base.docx")
+    
+        estilo = certificadoBase.styles["Normal"]
+        
+        contenidoBase = "ha realizado con éxito el curso de 20 horas de Python RPA, organizado por la escuela de Cursos Online de RPA, con fecha de inicio "
+        contenidoCertificado = f"{nombreAlumnoSeparado}, con número de documento {documentoSeparado},  {contenidoBase} {fechaInicialSeparado} y finalizado el {fechaFinalSeparado}. "
+        
+        for paragrafo in certificadoBase.paragraphs:
+            
+            if "@nombre" in paragrafo.text:
+                
+                paragrafo.text = nombreAlumnoSeparado
+                fuente = estilo.font
+                fuente.name = "Calibri (Corpo)"
+                fuente.size = Pt(14)
+                
+            if "@fecha_final" in paragrafo.text:
+                
+                paragrafo.text = contenidoCertificado
+                fuente = estilo.font
+                fuente.name = "Calibri (Corpo)"
+                fuente.size = Pt(14)
+
+        pathCertificado = r"dap-v1\data"
+        certificadoBase.save(f"{pathCertificado}/Certificado-{nombreAlumnoSeparado}-{documentoSeparado}.docx")
+        
+    messagebox.showinfo("Certificados Generados", "Los certificados han sido generados exitosamente.")        
 
 btnGenerarCertificadoEnMasa = Button(text="Generar Certificado en Masa", font=("Arial 12"), command=generarCertificadoEnMasa)
 btnGenerarCertificadoEnMasa.grid(row=5, column=4, columnspan=2, sticky="nsew", padx=20)
