@@ -2,6 +2,9 @@ import pandas as pd
 from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
+from docx import Document
+from docx.shared import Pt
+
 
 frm = Tk()
 frm.title("RPA Python - Generador de Certificados")
@@ -61,11 +64,25 @@ datosUsuarios["Fecha_Inicial"] = datosUsuarios["Fecha_Inicial"].astype(str)
 datosUsuarios["Fecha_Final"] = datosUsuarios["Fecha_Final"].astype(str)
 
 for linea in range(len(datosUsuarios)):
+
+    fechaInicialAnio = datosUsuarios.iloc[linea, 3].split("-")[0]
+    fechaInicialMes = datosUsuarios.iloc[linea, 3].split("-")[1]
+    fechaInicialDia = datosUsuarios.iloc[linea, 3].split("-")[2]
+    
+    fechaInicioTratada = fechaInicialDia + "/" + fechaInicialMes + "/" + fechaInicialAnio
+    
+    fechaFinalAnio = datosUsuarios.iloc[linea, 4].split("-")[0]
+    fechaFinalMes = datosUsuarios.iloc[linea, 4].split("-")[1]
+    fechaFinalDia = datosUsuarios.iloc[linea, 4].split("-")[2]
+    
+    fechaFinalTratada = fechaFinalDia + "/" + fechaFinalMes + "/" + fechaFinalAnio
+    
+    
     treeviewDatos.insert("", "end", values=(str(datosUsuarios.iloc[linea, 0]),
                                             str(datosUsuarios.iloc[linea, 1]),
                                             str(datosUsuarios.iloc[linea, 2]),
-                                            str(datosUsuarios.iloc[linea, 3]),
-                                            str(datosUsuarios.iloc[linea, 4]),
+                                            str(fechaInicioTratada),
+                                            str(fechaFinalTratada),
                                             str(datosUsuarios.iloc[linea, 5]),))
     
 
@@ -106,7 +123,43 @@ btnFiltrar = Button(text="Filtrar", font=("Arial 12"), command=filtrarDatos)
 btnFiltrar.grid(row=5, column=0, columnspan=2, sticky="nsew", padx=20)
 
 def generarCertificado():
-    pass
+    certificadoBase = Document(r"dap-v1\data\certificado-base.docx")
+    
+    estilo = certificadoBase.styles["Normal"]
+    
+    documentoAlumno = txtDocumento.get()
+    nombreAlumno = txtNombre.get()
+    fechaInicio = txtFechaInicial.get()
+    fechaFin = txtFechaFinal.get()
+    dictadoPor = "RPA Python"
+    
+    contenidoBase = "ha realizado con éxito el curso de 20 horas de Python RPA, organizado por la escuela de Cursos Online de RPA, con fecha de inicio "
+    contenidoCertificado = f"{nombreAlumno}, con número de documento {documentoAlumno},  {contenidoBase} {fechaInicio} y finalizado el {fechaFin}. "
+    
+    for paragrafo in certificadoBase.paragraphs:
+        if "@nombre" in paragrafo.text:
+            paragrafo.text = nombreAlumno
+            fuente = estilo.font
+            fuente.name = "Calibri (Corpo)"
+            fuente.size = Pt(14)
+            
+        if "@fecha_final" in paragrafo.text:
+            paragrafo.text = contenidoCertificado
+            fuente = estilo.font
+            fuente.name = "Calibri (Corpo)"
+            fuente.size = Pt(14)
+
+    pathCertificado = r"dap-v1\data"
+    certificadoBase.save(f"{pathCertificado}/Certificado-{nombreAlumno}-{documentoAlumno}.docx")
+    
+    txtDireccion.delete(0, END)
+    txtNombre.delete(0, END)
+    txtDocumento.delete(0, END)
+    txtFechaInicial.delete(0, END)
+    txtFechaFinal.delete(0, END)    
+    txtEmail.delete(0, END)
+    
+    messagebox.showinfo("Certificado Generado", "El certificado ha sido generado exitosamente.")
 
 btnGenerarCertificado = Button(text="Generar Certificado", font=("Arial 12"), command=generarCertificado)
 btnGenerarCertificado.grid(row=5, column=2, columnspan=2, sticky="nsew", padx=20)

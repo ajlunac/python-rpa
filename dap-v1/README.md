@@ -7,3 +7,5 @@
 - Pandas
 - Datetime
 - Numpy
+- Docx
+- Python-docx
