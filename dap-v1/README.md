@@ -9,3 +9,7 @@
 - Numpy
 - Docx
 - Python-docx
+- Auto-py-to-exe
+- Selenium
+- Webdriver-manager
+- PyAutoGUI
