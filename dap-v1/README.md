@@ -13,3 +13,4 @@
 - Selenium
 - Webdriver-manager
 - PyAutoGUI
+- Openpyxl
