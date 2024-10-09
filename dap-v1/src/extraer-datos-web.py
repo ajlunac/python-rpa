@@ -81,6 +81,3 @@ btnExportar = Button(text="Exportar", font=("Arial", 12), command=exportarExcel)
 btnExportar.grid(row=1, column=0, columnspan=8, sticky="nsew")
     
 frm.mainloop()
-   
-   
-    
